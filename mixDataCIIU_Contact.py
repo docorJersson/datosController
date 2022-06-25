@@ -65,8 +65,8 @@ def reasignando(dfFaltantes, dfCIIU_Contacto):
              [""]*numberRow,  # motivo no contacto
              [""]*numberRow,  # fecha
              [""]*numberRow,  # observaciones
-             ["QZ25"]*numberRow,
-             ["BAZAN LOAYZA LOURDES DEL CARMEN"]*numberRow]
+             [""]*numberRow,
+             [""]*numberRow]
 
     colums_name = dfCIIU_Contacto.columns.to_numpy(copy=True)
     list_tuples = list(zip(colums_name, datos))
@@ -120,7 +120,33 @@ def asignar(dfReasignado,dfColaborador):
             dfReasignado['Nombre de colaborador'][i]=randowmCola.colaborador.values[0]
         
     else:
+        numeroContri=len(dfReasignado)
+        print(f"\nTotal de Contribuyentes:{numeroContri}")
+        suma=0
+        nroContris=0
+        arrayNumero=[]
+        for i,row in dfColaborador.iterrows():
+            while True:
+                nroContris=int(input(f"\n¿Cuántos a {row['colaborador']}:"))
+                if((suma+nroContris)<=numeroContri):
+                    suma=suma+nroContris
+                    arrayNumero.append(nroContris)
+                    break
+                else:
+                    print("\nValor superado al número disponible. Intente otra vez")
         print("Asignando")
+        print(arrayNumero[0])
+        print(type(arrayNumero[0]))
+        itera=0
+        for i in dfColaborador.index:
+            print(i)
+            lis=dfReasignado[~dfReasignado.Registro.isnull()].sample(arrayNumero[itera]).ruc.tolist()
+            print(lis)
+     
+            dfReasignado.loc[dfReasignado.ruc.isin(lis),'Registro']= dfColaborador['Registro'][i]
+            dfReasignado.loc[dfReasignado.ruc.isin(lis),'colaborador']= dfColaborador['colaborador'][i]
+            itera=+1
+    
     return dfReasignado
 
 if __name__ == "__main__":
