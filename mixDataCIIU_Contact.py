@@ -3,7 +3,7 @@
 Created on Wed Jun 22 21:17:26 2022
 
 @author: HP
-"""
+""" 
 
 import pandas as pd
 from datetime import date
@@ -45,7 +45,8 @@ def selection(dfFaltantes, dfCIIU_Contacto):
 
 def reasignando(dfFaltantes, dfCIIU_Contacto):
     numberRow = len(dfFaltantes)
-    datos = [["QZ25"]*numberRow,
+    numerUltimo=int(input("Ingrese el valor inicial de los titúlos:"))
+    datos = [range(numerUltimo,numerUltimo+numberRow),
              dfFaltantes.univ,
              dfFaltantes.ruc,
              dfFaltantes.nombre,
@@ -110,6 +111,7 @@ def colaboradores():
     return dfColaborador
 
 
+
 def asignar(dfReasignado,dfColaborador):
     n=input("¿Nos dejarías asignar aleatoriamente los colaboradores?[Y/N]:")
     if n.upper()=="Y":
@@ -129,24 +131,27 @@ def asignar(dfReasignado,dfColaborador):
             while True:
                 nroContris=int(input(f"\n¿Cuántos a {row['colaborador']}:"))
                 if((suma+nroContris)<=numeroContri):
+                    print(nroContris)
                     suma=suma+nroContris
                     arrayNumero.append(nroContris)
                     break
                 else:
                     print("\nValor superado al número disponible. Intente otra vez")
         print("Asignando")
-        print(arrayNumero[0])
-        print(type(arrayNumero[0]))
         itera=0
         for i in dfColaborador.index:
-            print(i)
-            lis=dfReasignado[~dfReasignado.Registro.isnull()].sample(arrayNumero[itera]).ruc.tolist()
+            print(itera)
+            print(arrayNumero[itera])
+            print(arrayNumero)
+            lis=dfReasignado[dfReasignado.Registro==""].sample(arrayNumero[itera]).ruc.tolist()
             print(lis)
-     
+            print(dfColaborador['Registro'][i])
             dfReasignado.loc[dfReasignado.ruc.isin(lis),'Registro']= dfColaborador['Registro'][i]
             dfReasignado.loc[dfReasignado.ruc.isin(lis),'colaborador']= dfColaborador['colaborador'][i]
-            itera=+1
-    
+            print(dfReasignado.Registro)
+            print(dfReasignado[dfReasignado.Registro==""])
+            itera=itera+1
+            print(itera)
     return dfReasignado
 
 if __name__ == "__main__":
