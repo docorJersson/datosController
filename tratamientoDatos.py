@@ -9,7 +9,7 @@ import os
 from tqdm import tqdm
 from datetime import date
 import time
-
+import mixDataCIIU_Contact as mD
     
 def loading():
     for i in tqdm(range(200)):
@@ -49,8 +49,32 @@ def filters(df,mainFilter):
 def getContrisUpdateds(df,dFilter):
     
     dfUpdated=df[~df.ruc.isin(dFilter.ruc)]
-    print(len(dfUpdated))
     return dfUpdated
+
+
+def contriSolo(dfUpdated):
+    print(dfFileGeneral)
+    fileName = input("Ingrese el nombre del archivo DE DATOS:")+".csv"
+    dfCIIU_Contacto=mD.readCIIU_DATOS(fileName)
+    dfCIIU_Contacto=dfCIIU_Contacto[dfCIIU_Contacto["¿Actualizó datos de contacto?"]!="SI"]
+    
+    #los que ya lo hicieron
+    dfShare=dfUpdated[dfUpdated.ruc.isin(dfCIIU_Contacto.ruc)]
+    
+    #los pendientes
+    dfFaltan=dfCIIU_Contacto[~dfCIIU_Contacto.ruc.isin(dfUpdated.ruc)]
+    
+
+    #los que ya lo hicieron con colaboradores    
+    dfWithCola=pd.merge(dfShare,dfCIIU_Contacto[["ruc","Nombre de colaborador","Title"]],on="ruc",how="left")
+    
+    #que no están en la intendencia 
+    dfNotIntedencia=dfCIIU_Contacto[~dfCIIU_Contacto.ruc.isin(dfFileGeneral.ruc)]
+    print(dfNotIntedencia)
+    exportData(dfNotIntedencia,"noIntendencia")
+    exportData(dfWithCola, "contrisSolo")
+    exportData(dfFaltan, "nuevoCIIU_DATOS")
+
 
 def view(df):
     df_cols=df.columns
@@ -86,15 +110,21 @@ def citas(dfUpdated,mainFilter):
 
 def main():
     fileName=input("Ingrese el nombre del archivo:")+".xlsx"
-    df=readFile(fileName)
-    print(df)
+    global dfFileGeneral
+    dfFileGeneral=readFile(fileName)
     mainFilter=input('¿Cuál será el indicador princial,OKA1, OKA2, AMBOS O ALTERNAOD:')
-    dFilter=filters(df,mainFilter)
-    dfUpdated=getContrisUpdateds(df,dFilter)
+    dFilter=filters(dfFileGeneral,mainFilter)
+    dfUpdated=getContrisUpdateds(dfFileGeneral,dFilter)
+    print(dfFileGeneral)
+    contriSolo(dfUpdated)
     citas(dfUpdated,mainFilter)
+    
+
     #view(df)
     #loading()
     exportData(dFilter,"faltantes")
+    
+dfFileGeneral=None
     
 if __name__=="__main__":
    main()

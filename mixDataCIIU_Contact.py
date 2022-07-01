@@ -14,7 +14,9 @@ import random
 pd.options.mode.chained_assignment = None 
 
 def main():
-    dfFaltantes, dfCIIU_Contacto = readExcels()
+    dfFaltantes = readExcels()
+    fileName = input("Ingrese el nombre del archivo:")+".csv"
+    dfCIIU_Contacto=readCIIU_DATOS(fileName)
     dfFaltantes=selection(dfFaltantes, dfCIIU_Contacto)
     dfReasignado= reasignando(dfFaltantes, dfCIIU_Contacto)
     dfColaborador=colaboradores()
@@ -27,15 +29,16 @@ def readExcels():
     dfFaltantes = pd.read_excel(f"..\output\{date.today()}_faltantes.xlsx",
                                 sheet_name="Sheet1",
                                 header=0)
+    return dfFaltantes
 
+def readCIIU_DATOS(fileName):
     path = "..\input"
-    fileName = input("Ingrese el nombre del archivo:")+".csv"
     fullPath = os.path.join(path, fileName)
     dfCIIU_Contacto = pd.read_csv(fullPath,
                                   delimiter=",",
                                   header=0
                                   )
-    return dfFaltantes, dfCIIU_Contacto
+    return dfCIIU_Contacto
 
 
 def selection(dfFaltantes, dfCIIU_Contacto):
@@ -45,35 +48,37 @@ def selection(dfFaltantes, dfCIIU_Contacto):
 
 def reasignando(dfFaltantes, dfCIIU_Contacto):
     numberRow = len(dfFaltantes)
-    numerUltimo=int(input("Ingrese el valor inicial de los titúlos:"))
-    datos = [range(numerUltimo,numerUltimo+numberRow),
-             dfFaltantes.univ,
-             dfFaltantes.ruc,
-             dfFaltantes.nombre,
-             ["No"]*numberRow,
-             [""]*numberRow,
-             [""]*numberRow,
-             dfFaltantes.correo1,
-             dfFaltantes.NumTelef3,
-             ["No"]*numberRow,
-             ["Ninguno designado"]*numberRow,
-             [""]*numberRow,
-             [""]*numberRow,
-             dfFaltantes.ok_A1,
-             ["Pendiente"]*numberRow,
-             [""]*numberRow,  # reportar
-             [""]*numberRow,  # esquela
-             [""]*numberRow,  # motivo no contacto
-             [""]*numberRow,  # fecha
-             [""]*numberRow,  # observaciones
-             [""]*numberRow,
-             [""]*numberRow]
-
-    colums_name = dfCIIU_Contacto.columns.to_numpy(copy=True)
-    list_tuples = list(zip(colums_name, datos))
-    data_dicctionary = dict(list_tuples)
-    dfReasignado = pd.DataFrame(data_dicctionary)
-    return dfReasignado
+    if numberRow>0:
+        print(f"\nSe encontró {numberRow} nuevos contribuyentes")
+        numerUltimo=int(dfCIIU_Contacto.Title.max())+1
+        datos = [range(numerUltimo,numerUltimo+numberRow),
+                 dfFaltantes.univ,
+                 dfFaltantes.ruc,
+                 dfFaltantes.nombre,
+                 ["No"]*numberRow,
+                 [""]*numberRow,
+                 [""]*numberRow,
+                 dfFaltantes.correo1,
+                 dfFaltantes.NumTelef3,
+                 ["No"]*numberRow,
+                 ["Ninguno designado"]*numberRow,
+                 [""]*numberRow,
+                 [""]*numberRow,
+                 dfFaltantes.ok_A1,
+                 ["Pendiente"]*numberRow,
+                 [""]*numberRow,  # reportar
+                 [""]*numberRow,  # esquela
+                 [""]*numberRow,  # motivo no contacto
+                 [""]*numberRow,  # fecha
+                 [""]*numberRow,  # observaciones
+                 [""]*numberRow,
+                 [""]*numberRow]
+    
+        colums_name = dfCIIU_Contacto.columns.to_numpy(copy=True)
+        list_tuples = list(zip(colums_name, datos))
+        data_dicctionary = dict(list_tuples)
+        dfReasignado = pd.DataFrame(data_dicctionary)
+        return dfReasignado
 
 def exportar(dfReasignado):
     dfReasignado.to_excel(f"..\output\{date.today()}_reasignado.xlsx",
